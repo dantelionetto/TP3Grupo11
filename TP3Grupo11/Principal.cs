@@ -47,6 +47,7 @@ namespace TP3Grupo11
                     double nroRandomClientesDiarios = Math.Round(rand.NextDouble(), 4);
                     clientesDiarios = generadorClientesDiarios(nroRandomClientesDiarios);
                     stockPastelitos = 200;
+                    acumuladorUtilidadDiaria = 0;
                     acumuladorVentasDiarias = 0;
                     acumuladorPastelitosSobrantesDiarios = 0;
                     if (i >= int.Parse(txtDesde.Text.ToString()) && i <= int.Parse(txtHasta.Text.ToString()) && contadorIteracionesMostradas < 100000)
