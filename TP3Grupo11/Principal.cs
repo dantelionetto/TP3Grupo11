@@ -18,41 +18,71 @@ namespace TP3Grupo11
         }
 
         int stockPastelitos = 200;
-        int costoPastelito = 30;
+        double costoPastelito = 30;
+        double costoDiario = 0;
         double promedioPastelitos = 0;
         double utilidadPromedio = 0;
+        double acumuladorVentasDiarias = 0;
+        double acumuladorUtilidad = 0;
         int limiteInf = 10;
         int limiteSup = 30;
-        int acumuladorPastelitosSobrantes = 0;
+        int acumuladorPastelitosSobrantesDiarios = 0;
         int cantDias = 0;
         int clientesDiarios = 0;
         int demandaCliente = 0;
         double precioDemandaCliente = 0;
         int acumuladorStockSobrante = 0;
+        int contadorIteracionesMostradas = 0;
+        double acumuladorUtilidadDiaria = 0;
 
         private void simulacion()
         {
             if (validarDemanda() == true) 
             {
+                costoDiario = costoPastelito * stockPastelitos;
                 cantDias = int.Parse(txtCantDias.Text);
-                for (int i = 0; i < cantDias; i++)
+                for (int i = 1; i < cantDias; i++)
                 {
-                    gdrSimulacion.Rows.Add(i, "-", "-", "-", "-", stockPastelitos, "-", "-");
-                    clientesDiarios = generadorClientesDiarios();
+                    Random rand = new Random();
+                    double nroRandomClientesDiarios = Math.Round(rand.NextDouble(), 4);
+                    clientesDiarios = generadorClientesDiarios(nroRandomClientesDiarios);
+                    stockPastelitos = 200;
+                    acumuladorVentasDiarias = 0;
+                    acumuladorPastelitosSobrantesDiarios = 0;
+                    if (i >= int.Parse(txtDesde.Text.ToString()) && i <= int.Parse(txtHasta.Text.ToString()) && contadorIteracionesMostradas < 100000)
+                    {
+                        gdrSimulacion.Rows.Add(i, nroRandomClientesDiarios ,"Clientela: " + clientesDiarios, "-", "-", "-", stockPastelitos, "-", "-", "-", "-");
+                        contadorIteracionesMostradas++;
+                    }
                     for (int cliente = 1;  cliente <= clientesDiarios; cliente ++)
                     {
-                        demandaCliente = demandaClientes();
+                        double nroRndDemanda = Math.Round(rand.NextDouble(), 4);
+                        demandaCliente = demandaClientes(nroRndDemanda);
                         if (demandaCliente <= stockPastelitos)
                         {
                             precioDemandaCliente = precioDemanda(demandaCliente);
                             stockPastelitos = stockPastelitos - demandaCliente;
-
-                        }    
-                        
-
+                            acumuladorVentasDiarias += precioDemandaCliente;
+                            if (i >= int.Parse(txtDesde.Text.ToString()) && i <= int.Parse(txtHasta.Text.ToString()) && contadorIteracionesMostradas < 100000)
+                            {
+                                gdrSimulacion.Rows.Add(i, "-" ,"Cliente " + cliente, nroRndDemanda, demandaCliente, precioDemandaCliente, stockPastelitos, "-", "-", "-", "-");
+                                contadorIteracionesMostradas++;
+                            }
+                        }
                     }
-                    acumuladorPastelitosSobrantes = stockPastelitos;
+                    acumuladorPastelitosSobrantesDiarios = stockPastelitos;
+                    acumuladorUtilidadDiaria = acumuladorVentasDiarias - costoDiario;
+                    acumuladorUtilidad += acumuladorUtilidadDiaria;
+                    if (i >= int.Parse(txtDesde.Text.ToString()) && i <= int.Parse(txtHasta.Text.ToString()) && contadorIteracionesMostradas < 100000)
+                    {
+                        gdrSimulacion.Rows.Add(i, "-", "-", "-", "-", "-", "-", acumuladorPastelitosSobrantesDiarios, "-", acumuladorUtilidad, "-");
+                        contadorIteracionesMostradas++;
+                    }
+                    acumuladorStockSobrante += acumuladorPastelitosSobrantesDiarios;
                 }
+                utilidadPromedio = Math.Round((acumuladorUtilidad / cantDias),4);
+                promedioPastelitos = (acumuladorStockSobrante / cantDias);
+                gdrSimulacion.Rows.Add("Fin", "-", "-", "-", "-", "-", "-", "-", promedioPastelitos, "-", utilidadPromedio);
             }
             else
             {
@@ -82,10 +112,15 @@ namespace TP3Grupo11
             txtPrecio10.Clear();
             gdrSimulacion.Rows.Clear();
             cantDias = 0;
-            acumuladorPastelitosSobrantes = 0;
+            acumuladorPastelitosSobrantesDiarios = 0;
             promedioPastelitos = 0;
             utilidadPromedio = 0;
             clientesDiarios = 0;
+            contadorIteracionesMostradas = 0;
+            promedioPastelitos = 0;
+            utilidadPromedio = 0;
+            acumuladorStockSobrante = 0;
+            acumuladorUtilidad = 0;
         }
 
         private void btnLimpiar_Click(object sender, EventArgs e)
@@ -95,7 +130,7 @@ namespace TP3Grupo11
 
         private bool validarDemanda()
         {
-            float cant = float.Parse(txtProb1.ToString()) + float.Parse(txtProb2.ToString()) + float.Parse(txtProb5.ToString()) + float.Parse(txtProb6.ToString()) + float.Parse(txtProb7.ToString()) + float.Parse(txtProb8.ToString()) + float.Parse(txtProb10.ToString());
+            double cant = Convert.ToDouble(txtProb1.Text.ToString()) + Convert.ToDouble(txtProb2.Text.ToString()) + Convert.ToDouble(txtProb5.Text.ToString()) + Convert.ToDouble(txtProb6.Text.ToString()) + Convert.ToDouble(txtProb7.Text.ToString()) + Convert.ToDouble(txtProb8.Text.ToString()) + Convert.ToDouble(txtProb10.Text.ToString());
             if (cant == 1.0)
             {
                 return true;
@@ -103,28 +138,27 @@ namespace TP3Grupo11
             return false;
         } 
 
-        private int generadorClientesDiarios()
+        private int generadorClientesDiarios(double rndRandomClientesDiarios)
         {
-            Random rand = new Random();
             int cantClientesDiarios = 0;
-            double nroRnd = Math.Round(rand.NextDouble(), 4);
+            Random rand = new Random();
+            double nroRnd = rndRandomClientesDiarios;
             cantClientesDiarios = (int)(limiteInf + nroRnd * (limiteSup - limiteInf));
             return cantClientesDiarios;
         }
 
-        private int demandaClientes() 
+        private int demandaClientes(double nroRandomDemanda) 
         {
             int demanda = 0;
-            Random rand = new Random();
-            double nroRnd = Math.Round(rand.NextDouble(), 4);
+            double nroRnd = nroRandomDemanda;
             double p1, p2, p5, p6, p7, p8, p10 = 0;
-            p1 = Convert.ToDouble(txtProb1.ToString());
-            p2 = Convert.ToDouble(txtProb2.ToString()) + p1;
-            p5 = Convert.ToDouble(txtProb5.ToString()) + p2;
-            p6 = Convert.ToDouble(txtProb6.ToString()) + p5;
-            p7 = Convert.ToDouble(txtProb7.ToString()) + p6;
-            p8 = Convert.ToDouble(txtProb5.ToString()) + p7;
-            p10 = Convert.ToDouble(txtProb5.ToString()) + p8;
+            p1 = Convert.ToDouble(txtProb1.Text.ToString());
+            p2 = Convert.ToDouble(txtProb2.Text.ToString()) + p1;
+            p5 = Convert.ToDouble(txtProb5.Text.ToString()) + p2;
+            p6 = Convert.ToDouble(txtProb6.Text.ToString()) + p5;
+            p7 = Convert.ToDouble(txtProb7.Text.ToString()) + p6;
+            p8 = Convert.ToDouble(txtProb5.Text.ToString()) + p7;
+            p10 = Convert.ToDouble(txtProb5.Text.ToString()) + p8;
             if (nroRnd < p1)
             {
                 demanda = 1;
@@ -161,31 +195,31 @@ namespace TP3Grupo11
             double precio = 0;
             if (demanda == 1)
             {
-                precio = demanda * double.Parse(txtPrecio1.ToString());
+                precio = demanda * double.Parse(txtPrecio1.Text.ToString());
             }
             else if (demanda == 2)
             {
-                precio = demanda * double.Parse(txtPrecio2.ToString());
+                precio = demanda * double.Parse(txtPrecio2.Text.ToString());
             }
             else if (demanda == 5)
             {
-                precio = demanda * double.Parse(txtPrecio5.ToString());
+                precio = demanda * double.Parse(txtPrecio5.Text.ToString());
             }
             else if (demanda == 6)
             {
-                precio = demanda * double.Parse(txtPrecio6.ToString());
+                precio = demanda * double.Parse(txtPrecio6.Text.ToString());
             }
             else if (demanda == 7)
             {
-                precio = demanda * double.Parse(txtPrecio7.ToString());
+                precio = demanda * double.Parse(txtPrecio7.Text.ToString());
             }
             else if (demanda == 8)
             {
-                precio = demanda * double.Parse(txtPrecio8.ToString());
+                precio = demanda * double.Parse(txtPrecio8.Text.ToString());
             }
             else
             {
-                precio = demanda * double.Parse(txtPrecio10.ToString());
+                precio = demanda * double.Parse(txtPrecio10.Text.ToString());
             }
             return precio;
         }
@@ -200,6 +234,11 @@ namespace TP3Grupo11
                 }
             }
             gdrSimulacion.Rows.Add("Ultima simulacion", "-", "-", "-", "-", "-", sobrante, utilidad);
+        }
+
+        private void btnGenerar_Click(object sender, EventArgs e)
+        {
+            simulacion();
         }
     }
 }

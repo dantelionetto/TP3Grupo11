@@ -126,6 +126,7 @@
             this.btnGenerar.TabIndex = 15;
             this.btnGenerar.Text = "Generar";
             this.btnGenerar.UseVisualStyleBackColor = true;
+            this.btnGenerar.Click += new System.EventHandler(this.btnGenerar_Click);
             // 
             // txtDesde
             // 
@@ -547,7 +548,7 @@
             this.clienteTabla.HeaderText = "Cliente";
             this.clienteTabla.Name = "clienteTabla";
             this.clienteTabla.ReadOnly = true;
-            this.clienteTabla.Width = 70;
+            this.clienteTabla.Width = 90;
             // 
             // nroRandomDemandaTabla
             // 
@@ -561,7 +562,7 @@
             this.demandaTabla.HeaderText = "Demanda";
             this.demandaTabla.Name = "demandaTabla";
             this.demandaTabla.ReadOnly = true;
-            this.demandaTabla.Width = 70;
+            this.demandaTabla.Width = 60;
             // 
             // precioDemandaTabla
             // 
