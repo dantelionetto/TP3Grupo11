@@ -39,8 +39,10 @@ namespace TP3Grupo11
         {
             if (validarDemanda() == true) 
             {
+                //Calculo el costo diario que tiene el vendedor por producir los pastelitos.
                 costoDiario = costoPastelito * stockPastelitos;
                 cantDias = int.Parse(txtCantDias.Text);
+                //Comienza a crear los dias que se van a simular.
                 for (int i = 1; i < cantDias; i++)
                 {
                     Random rand = new Random();
@@ -50,19 +52,24 @@ namespace TP3Grupo11
                     acumuladorUtilidadDiaria = 0;
                     acumuladorVentasDiarias = 0;
                     acumuladorPastelitosSobrantesDiarios = 0;
+                    //Valida el desde, hasta e iteraciones totales, mostrando la primer fila donde se calcula cuantos clientes va a tener.
                     if (i >= int.Parse(txtDesde.Text.ToString()) && i <= int.Parse(txtHasta.Text.ToString()) && contadorIteracionesMostradas < 100000)
                     {
                         gdrSimulacion.Rows.Add(i, nroRandomClientesDiarios ,"Clientela: " + clientesDiarios, "-", "-", "-", stockPastelitos, "-", "-", "-", "-");
                         contadorIteracionesMostradas++;
                     }
+                    //Dentro del dia i calcula la demanda que cada cliente tendra y el precio total por la venta.
                     for (int cliente = 1;  cliente <= clientesDiarios; cliente ++)
                     {
                         double nroRndDemanda = Math.Round(rand.NextDouble(), 4);
                         demandaCliente = demandaClientes(nroRndDemanda);
+                        //Valida que haya mas stock que demanda, en caso negativo no se le vende al cliente.
                         if (demandaCliente <= stockPastelitos)
                         {
                             precioDemandaCliente = precioDemanda(demandaCliente);
+                            //Calculo el stock venta por venta.
                             stockPastelitos = stockPastelitos - demandaCliente;
+                            //Acumulo las ventas diarias.
                             acumuladorVentasDiarias += precioDemandaCliente;
                             if (i >= int.Parse(txtDesde.Text.ToString()) && i <= int.Parse(txtHasta.Text.ToString()) && contadorIteracionesMostradas < 100000)
                             {
@@ -71,7 +78,9 @@ namespace TP3Grupo11
                             }
                         }
                     }
+                    //Al finalizar el calculo de los clientes, almaceno el stock restante.
                     acumuladorPastelitosSobrantesDiarios = stockPastelitos;
+                    //Calculo la utilidad del dia i y acumulo la utilidad.
                     acumuladorUtilidadDiaria = acumuladorVentasDiarias - costoDiario;
                     acumuladorUtilidad += acumuladorUtilidadDiaria;
                     if (i >= int.Parse(txtDesde.Text.ToString()) && i <= int.Parse(txtHasta.Text.ToString()) && contadorIteracionesMostradas < 100000)
@@ -79,8 +88,10 @@ namespace TP3Grupo11
                         gdrSimulacion.Rows.Add(i, "-", "-", "-", "-", "-", "-", acumuladorPastelitosSobrantesDiarios, "-", acumuladorUtilidad, "-");
                         contadorIteracionesMostradas++;
                     }
+                    //Acumulo los sobrantes de cada dia de la simulacion.
                     acumuladorStockSobrante += acumuladorPastelitosSobrantesDiarios;
                 }
+                //Calculo al final de la simulacion la utilidad promedio y el sobrante promedio segun la cantidad de dias simulados.
                 utilidadPromedio = Math.Round((acumuladorUtilidad / cantDias),4);
                 promedioPastelitos = (acumuladorStockSobrante / cantDias);
                 gdrSimulacion.Rows.Add("Fin", "-", "-", "-", "-", "-", "-", "-", promedioPastelitos, "-", utilidadPromedio);
@@ -91,7 +102,7 @@ namespace TP3Grupo11
             }
         }
 
-
+        //Limpia los campos de la pantalla principal.
         public void limpiar()
         {
             txtCantDias.Clear();
@@ -129,6 +140,7 @@ namespace TP3Grupo11
             limpiar();
         }
 
+        //Funcion para validar que las probabilidades ingresadas de demanda sumen 1
         private bool validarDemanda()
         {
             double cant = Convert.ToDouble(txtProb1.Text.ToString()) + Convert.ToDouble(txtProb2.Text.ToString()) + Convert.ToDouble(txtProb5.Text.ToString()) + Convert.ToDouble(txtProb6.Text.ToString()) + Convert.ToDouble(txtProb7.Text.ToString()) + Convert.ToDouble(txtProb8.Text.ToString()) + Convert.ToDouble(txtProb10.Text.ToString());
@@ -139,6 +151,7 @@ namespace TP3Grupo11
             return false;
         } 
 
+        //Funcion para generar la cantidad de clientes diarios que va a tener el vendedor con la distribucion uniforma tomando a y b.
         private int generadorClientesDiarios(double rndRandomClientesDiarios)
         {
             int cantClientesDiarios = 0;
@@ -148,6 +161,7 @@ namespace TP3Grupo11
             return cantClientesDiarios;
         }
 
+        //Funcion para calcular la demanda de cada cliente.
         private int demandaClientes(double nroRandomDemanda) 
         {
             int demanda = 0;
@@ -191,6 +205,7 @@ namespace TP3Grupo11
             return demanda;
         }
 
+        //Funcion para conocer a que precio se vende cada pastelito segun el parametro de demanda que ingresa el usuario.
         private double precioDemanda(int demanda) 
         {
             double precio = 0;
@@ -223,18 +238,6 @@ namespace TP3Grupo11
                 precio = demanda * double.Parse(txtPrecio10.Text.ToString());
             }
             return precio;
-        }
-
-        private void cargarGrilla(int desde, int hasta, int dia, string cliente, double nroRnd, int demanda, double precio, int stock, int sobrante, double utilidad)
-        {
-            for (int i = desde; i < hasta; i++) 
-            {
-                if (i <= 100000)
-                {
-                    gdrSimulacion.Rows.Add(dia, cliente, nroRnd, demanda, precio, stock, "-", "-");
-                }
-            }
-            gdrSimulacion.Rows.Add("Ultima simulacion", "-", "-", "-", "-", "-", sobrante, utilidad);
         }
 
         private void btnGenerar_Click(object sender, EventArgs e)
