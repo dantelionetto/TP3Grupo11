@@ -37,69 +37,77 @@ namespace TP3Grupo11
 
         private void simulacion()
         {
-            if (validarDemanda() == true) 
+            if (validarDiasAMostrar() == true)
             {
-                //Calculo el costo diario que tiene el vendedor por producir los pastelitos.
-                costoDiario = costoPastelito * stockPastelitos;
-                cantDias = int.Parse(txtCantDias.Text);
-                //Comienza a crear los dias que se van a simular.
-                for (int i = 1; i < cantDias; i++)
+                if (validarDemanda() == true)
                 {
-                    Random rand = new Random();
-                    double nroRandomClientesDiarios = Math.Round(rand.NextDouble(), 4);
-                    clientesDiarios = generadorClientesDiarios(nroRandomClientesDiarios);
-                    stockPastelitos = 200;
-                    acumuladorUtilidadDiaria = 0;
-                    acumuladorVentasDiarias = 0;
-                    acumuladorPastelitosSobrantesDiarios = 0;
-                    //Valida el desde, hasta e iteraciones totales, mostrando la primer fila donde se calcula cuantos clientes va a tener.
-                    if (i >= int.Parse(txtDesde.Text.ToString()) && i <= int.Parse(txtHasta.Text.ToString()) && contadorIteracionesMostradas < 100000)
+                    //Calculo el costo diario que tiene el vendedor por producir los pastelitos.
+                    costoDiario = costoPastelito * stockPastelitos;
+                    cantDias = int.Parse(txtCantDias.Text);
+                    //Comienza a crear los dias que se van a simular.
+                    for (int i = 1; i < cantDias; i++)
                     {
-                        gdrSimulacion.Rows.Add(i, nroRandomClientesDiarios ,"Clientela: " + clientesDiarios, "-", "-", "-", stockPastelitos, "-", "-", "-", "-");
-                        contadorIteracionesMostradas++;
-                    }
-                    //Dentro del dia i calcula la demanda que cada cliente tendra y el precio total por la venta.
-                    for (int cliente = 1;  cliente <= clientesDiarios; cliente ++)
-                    {
-                        double nroRndDemanda = Math.Round(rand.NextDouble(), 4);
-                        demandaCliente = demandaClientes(nroRndDemanda);
-                        //Valida que haya mas stock que demanda, en caso negativo no se le vende al cliente.
-                        if (demandaCliente <= stockPastelitos)
+                        Random rand = new Random();
+                        double nroRandomClientesDiarios = Math.Round(rand.NextDouble(), 4);
+                        clientesDiarios = generadorClientesDiarios(nroRandomClientesDiarios);
+                        stockPastelitos = 200;
+                        acumuladorUtilidadDiaria = 0;
+                        acumuladorVentasDiarias = 0;
+                        acumuladorPastelitosSobrantesDiarios = 0;
+                        //Valida el desde, hasta e iteraciones totales, mostrando la primer fila donde se calcula cuantos clientes va a tener.
+                        if (i >= int.Parse(txtDesde.Text.ToString()) && i <= int.Parse(txtHasta.Text.ToString()) && contadorIteracionesMostradas < 100000)
                         {
-                            precioDemandaCliente = precioDemanda(demandaCliente);
-                            //Calculo el stock venta por venta.
-                            stockPastelitos = stockPastelitos - demandaCliente;
-                            //Acumulo las ventas diarias.
-                            acumuladorVentasDiarias += precioDemandaCliente;
-                            if (i >= int.Parse(txtDesde.Text.ToString()) && i <= int.Parse(txtHasta.Text.ToString()) && contadorIteracionesMostradas < 100000)
+                            gdrSimulacion.Rows.Add(i, nroRandomClientesDiarios, "Clientela: " + clientesDiarios, "-", "-", "-", stockPastelitos, "-", "-", "-", "-");
+                            contadorIteracionesMostradas++;
+                        }
+                        //Dentro del dia i calcula la demanda que cada cliente tendra y el precio total por la venta.
+                        for (int cliente = 1; cliente <= clientesDiarios; cliente++)
+                        {
+                            double nroRndDemanda = Math.Round(rand.NextDouble(), 4);
+                            demandaCliente = demandaClientes(nroRndDemanda);
+                            //Valida que haya mas stock que demanda, en caso negativo no se le vende al cliente.
+                            if (demandaCliente <= stockPastelitos)
                             {
-                                gdrSimulacion.Rows.Add(i, "-" ,"Cliente " + cliente, nroRndDemanda, demandaCliente, precioDemandaCliente, stockPastelitos, "-", "-", "-", "-");
-                                contadorIteracionesMostradas++;
+                                precioDemandaCliente = precioDemanda(demandaCliente);
+                                //Calculo el stock venta por venta.
+                                stockPastelitos = stockPastelitos - demandaCliente;
+                                //Acumulo las ventas diarias.
+                                acumuladorVentasDiarias += precioDemandaCliente;
+                                if (i >= int.Parse(txtDesde.Text.ToString()) && i <= int.Parse(txtHasta.Text.ToString()) && contadorIteracionesMostradas < 100000)
+                                {
+                                    gdrSimulacion.Rows.Add(i, "-", "Cliente " + cliente, nroRndDemanda, demandaCliente, precioDemandaCliente, stockPastelitos, "-", "-", "-", "-");
+                                    contadorIteracionesMostradas++;
+                                }
                             }
                         }
+                        //Al finalizar el calculo de los clientes, almaceno el stock restante.
+                        acumuladorPastelitosSobrantesDiarios = stockPastelitos;
+                        //Calculo la utilidad del dia i y acumulo la utilidad.
+                        acumuladorUtilidadDiaria = acumuladorVentasDiarias - costoDiario;
+                        acumuladorUtilidad += acumuladorUtilidadDiaria;
+                        if (i >= int.Parse(txtDesde.Text.ToString()) && i <= int.Parse(txtHasta.Text.ToString()) && contadorIteracionesMostradas < 100000)
+                        {
+                            gdrSimulacion.Rows.Add(i, "-", "-", "-", "-", "-", "-", acumuladorPastelitosSobrantesDiarios, "-", acumuladorUtilidad, "-");
+                            contadorIteracionesMostradas++;
+                        }
+                        //Acumulo los sobrantes de cada dia de la simulacion.
+                        acumuladorStockSobrante += acumuladorPastelitosSobrantesDiarios;
                     }
-                    //Al finalizar el calculo de los clientes, almaceno el stock restante.
-                    acumuladorPastelitosSobrantesDiarios = stockPastelitos;
-                    //Calculo la utilidad del dia i y acumulo la utilidad.
-                    acumuladorUtilidadDiaria = acumuladorVentasDiarias - costoDiario;
-                    acumuladorUtilidad += acumuladorUtilidadDiaria;
-                    if (i >= int.Parse(txtDesde.Text.ToString()) && i <= int.Parse(txtHasta.Text.ToString()) && contadorIteracionesMostradas < 100000)
-                    {
-                        gdrSimulacion.Rows.Add(i, "-", "-", "-", "-", "-", "-", acumuladorPastelitosSobrantesDiarios, "-", acumuladorUtilidad, "-");
-                        contadorIteracionesMostradas++;
-                    }
-                    //Acumulo los sobrantes de cada dia de la simulacion.
-                    acumuladorStockSobrante += acumuladorPastelitosSobrantesDiarios;
+                    //Calculo al final de la simulacion la utilidad promedio y el sobrante promedio segun la cantidad de dias simulados.
+                    utilidadPromedio = Math.Round((acumuladorUtilidad / cantDias), 4);
+                    promedioPastelitos = (acumuladorStockSobrante / cantDias);
+                    gdrSimulacion.Rows.Add("Fin", "-", "-", "-", "-", "-", "-", "-", promedioPastelitos, "-", utilidadPromedio);
                 }
-                //Calculo al final de la simulacion la utilidad promedio y el sobrante promedio segun la cantidad de dias simulados.
-                utilidadPromedio = Math.Round((acumuladorUtilidad / cantDias),4);
-                promedioPastelitos = (acumuladorStockSobrante / cantDias);
-                gdrSimulacion.Rows.Add("Fin", "-", "-", "-", "-", "-", "-", "-", promedioPastelitos, "-", utilidadPromedio);
+                else
+                {
+                    MessageBox.Show("Las probabilidades de la demanda no son correctas. Ingrese otros valores.");
+                }
             }
             else
             {
-                MessageBox.Show("Las probabilidades de la demanda no son correctas. Ingrese otros valores.");
+                MessageBox.Show("Ingrese dias a mostrar correctos.");
             }
+            
         }
 
         //Limpia los campos de la pantalla principal.
@@ -240,6 +248,15 @@ namespace TP3Grupo11
             return precio;
         }
 
+        //Valida que el desde sea menor al hasta y que hasta sea menor o igual que la cantidad de dias a simumlar.
+        private bool validarDiasAMostrar()
+        {
+            if (int.Parse(txtDesde.Text.ToString()) < int.Parse(txtHasta.Text.ToString()) && int.Parse(txtHasta.Text.ToString()) <= int.Parse(txtCantDias.Text.ToString()))
+            {
+                return true;
+            }
+            return false;
+        }
         private void btnGenerar_Click(object sender, EventArgs e)
         {
             simulacion();
