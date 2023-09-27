@@ -44,10 +44,10 @@ namespace TP3Grupo11
                     //Calculo el costo diario que tiene el vendedor por producir los pastelitos.
                     costoDiario = costoPastelito * stockPastelitos;
                     cantDias = int.Parse(txtCantDias.Text);
+                    Random rand = new Random();
                     //Comienza a crear los dias que se van a simular.
                     for (int i = 1; i < cantDias; i++)
                     {
-                        Random rand = new Random();
                         double nroRandomClientesDiarios = Math.Round(rand.NextDouble(), 4);
                         clientesDiarios = generadorClientesDiarios(nroRandomClientesDiarios);
                         stockPastelitos = 200;
@@ -87,7 +87,7 @@ namespace TP3Grupo11
                         acumuladorUtilidad += acumuladorUtilidadDiaria;
                         if (i >= int.Parse(txtDesde.Text.ToString()) && i <= int.Parse(txtHasta.Text.ToString()) && contadorIteracionesMostradas < 100000)
                         {
-                            gdrSimulacion.Rows.Add(i, "-", "-", "-", "-", "-", "-", acumuladorPastelitosSobrantesDiarios, "-", acumuladorUtilidad, "-");
+                            gdrSimulacion.Rows.Add(i, "-", "-", "-", "-", "-", "-", acumuladorPastelitosSobrantesDiarios, "-", acumuladorUtilidadDiaria, "-");
                             contadorIteracionesMostradas++;
                         }
                         //Acumulo los sobrantes de cada dia de la simulacion.
@@ -163,9 +163,7 @@ namespace TP3Grupo11
         private int generadorClientesDiarios(double rndRandomClientesDiarios)
         {
             int cantClientesDiarios = 0;
-            Random rand = new Random();
-            double nroRnd = rndRandomClientesDiarios;
-            cantClientesDiarios = (int)(limiteInf + nroRnd * (limiteSup - limiteInf));
+            cantClientesDiarios = (int)(limiteInf + rndRandomClientesDiarios * (limiteSup - limiteInf));
             return cantClientesDiarios;
         }
 
